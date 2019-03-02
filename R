@@ -1,0 +1,69 @@
+###Clase 1
+#1.0 Suma de dos variables
+a=1+5
+a
+#Raiz cuadrada
+sqrt(4)
+
+#2.0 Cargando archivos
+rm(list = ls())
+library(hydroGOF)
+setwd("C:/Users/Alejandro/Desktop/base_pos")
+filename="prueba1.csv"; 
+data<-read.csv(file=filename, header=TRUE, sep = ";", dec = ".") 
+#data (speed=velocidad de vehículo; dist=distancia de frenado)
+
+#1.0 FUNCIÓN ATTACH
+#attach=Permite referenciar los nombres de las columnas de los data.frames, sin necesidad de-
+#especificar el nombre del data.frame precedido del símbolo $, lo que agiliza su manipulación. 
+attach(data)
+vel=speed
+dis=dist
+#sin attach
+vel2=data$speed
+dis2=data$dist
+
+#2.0 FUNCIÓN PLOT.- Permite dibujar en coordenadas x,y
+m=plot(vel,dis,xlim=c(-5,30),ylim=c(-20,120))
+
+#3.0 FORMANDO ECUACIÓN LINEAL: Y=aX+b; 
+  #Usando función "lm": lm(linear models); lm(Y~X)
+
+n=lm(dis~vel)
+#abline(n) #"abline":traza la recta de regresión lineal
+
+  #Resumén estadístico (summary)
+summary(n) #resumen estadístico de la ecuación formada en variable "n"
+
+  #De ahí se extrae el intercepto y el coeficiente
+b=-17.5791
+a=3.9324
+
+  #Ecuación: Y=3.9324X-17.5791
+
+
+#Coeficiente de determinación (R-squared=R2)=mide la bondad del ajuste de la recta a los datos. 
+#Coeficiente de determinación ajustado (Adjusted R-squared=R2-ajustado)= Lo mismo que el anterior,
+#pero penalisa penaliza la inclusión de variables explicativas.
+#p-value: Cuanto menor sea p, más significativos son los datos
+
+#4.0 HACIENDO PREDICCIONES
+#Predicción de la variable dependiente respecto a los valores que puede tomar la variable independiente
+
+##prediciendo en un intervalo
+ttt=0:26
+yy=predict(n, data.frame(vel=ttt))#n es el modelo de regresión lineal
+lines(ttt,yy,type="l",lwd=c(2),col="blue",lty=3)
+abline(h=0,col="red")
+
+##prediciendo en el mismo rango
+yy=predict(n)
+
+#Coeficiente de eficiencia del modelo Nash-Sutcliffe
+nse1=NSE(yy,dis);nse1
+rmse1=rmse(yy,dis);rmse1
+
+
+
+#Para validar el modelo debemos comprobar que cumple con ciertas reglas ya establecidas, para segurar;
+#que el modelo es bueno
