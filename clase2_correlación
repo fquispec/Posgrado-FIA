@@ -1,0 +1,27 @@
+library(readxl)
+pru_1 <- read_excel("F:..../pru_1.xlsx",
+                    sheet = "Hoja1")
+pru_2 <- read_excel("F:/05 Estancia_acad/....../pru_1.xlsx", 
+                    sheet = "Hoja2")
+
+#1.0 Datos composicionales-Ejemplo 1
+cor(pru_1)
+cor(pru_2)
+
+#2.0 Datos composicionales-Ejemplo 2
+x=c(50,60,70,75,80,90)
+y=c(50,85,110,140,170,200)
+w=x+y
+xi=x/w*100; xi
+yi=y/w*100; yi
+
+  #Análisis de correlaciones
+cor(x,y); 0.9914
+cor(xi,yi);-1
+
+  #Plot de datos
+par(mfrow=c(1,2))
+plot(x,y,main=title("Espesor de estratos (metros)"),xlab="Espesor x (metros)",
+     ylab="Espesor y (metros)")
+plot(xi,yi,main=title("Espesor de estratos (porcentajes)"),xlab="Espesor x (%)",
+     ylab="Espesor y (%)",col="blue")
