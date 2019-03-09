@@ -1,0 +1,83 @@
+rm(list = ls())
+library(graphics); library(compositions); library(robCompositions);#library(mgcv);;library(hydroGOF);
+#library(mvoutlier);#library(gridExtra)
+#library(ggplot2)
+#
+setwd(".....")#En líneas, colocar ubicación de directorio de trabajo.
+
+filename<-"water_as.csv"; 
+data<-read.csv(file=filename, header=TRUE, sep = ";", dec = "."); 
+data0W<-data; levels(data0W$country)
+
+#Para que gráfica salga en PDF
+plotpdf<-TRUE
+if(plotpdf){pdf(file=paste("Práctica_posgrado.pdf"),width=9, height=9)}
+
+#construyendo base
+xx<-data[c(9:12)]; t<-data[4]; #RURAL
+signs <- rbind (c( 1, 1, -1, -1),c(1, -1, 0, 0),c(0, 0, 1, -1)); 
+VV=gsi.buildilrBase(t(signs))
+dd<- unclass(ilr(xx,VV));
+
+
+#Gráficar en varias ventanas
+par(mfrow=c(3,2))
+#Regresión lineal clásica
+n1=lm(xx[,1]~t[,1]);l1=predict(n1)
+n2=lm(xx[,2]~t[,1]);l2=predict(n2)
+n3=lm(xx[,3]~t[,1]);l3=predict(n3)
+n4=lm(xx[,4]~t[,1]);l4=predict(n4)
+plot(t[,1],xx[,1],xlim=c(2000,2025),ylim=c(-0.1,1),xlab="year",ylab="cobertura",pch=18,col="black")
+points(t[,1],xx[,2], col="blue",pch=20)
+points(t[,1],xx[,3], col="green",pch=17)
+points(t[,1],xx[,4], col="pink",pch=7)
+lines(t[,1],l1,type="l",col="black",lty=2)
+lines(t[,1],l2,type="l",col="blue",lty=2)
+lines(t[,1],l3,type="l",col="green",lty=2)
+lines(t[,1],l4,type="l",col="pink",lty=2)
+abline(h=0,col="red")
+legend(2015.5,0.8,paste(c("Indicadores","entubado","otras.mejor.","superficial","otras.no.mejora")),
+       col=c("white","black","blue","green","pink"),pch=c(1,18,20,17,7))
+
+#Transformada de datos (ilr).
+ols1  <- lm(dd[,1] ~ t[,1]);  yy1 <- predict(ols1) 
+ols2  <- lm(dd[,2] ~ t[,1]);  yy2 <- predict(ols2)
+ols3  <- lm(dd[,3] ~ t[,1]);  yy3 <- predict(ols3)
+z1<-ilrInv(array(cbind(yy1,yy2,yy3),dim = c(length(yy1),3)),VV)
+
+#Gráfica en la transformada 
+#par(mfrow=c(1,2))
+plot(t[,1],dd[,1],xlim=c(2000,2020),ylim=c(-4,4.5),xlab="year",ylab="ilr",pch=18,col="black")
+points(t[,1],dd[,2], col="blue",pch=20)
+points(t[,1],dd[,3], col="green",pch=17)
+lines(t[,1],yy1,type="l",col="black")
+lines(t[,1],yy2,type="l",col="blue")
+lines(t[,1],yy3,type="l",col="green")
+legend(2015.5,3,paste(c("ilr ","ilr1 ","ilr2 ","ilr3 ")),
+       col=c("white","black","blue","green"),pch=c(1,18,20,17))
+
+#Valores atípicos
+m1=outCoDa(xx, quantile = 0.975, method = "robust")
+m2=cbind(m1$mahalDist)
+plot(t[,1],m2,xlim=c(2000,2016), xlab="year",ylab="Robust Mahalanobis distance",
+     text(t[,1],m2,main=title(paste("Outliers treatment method"), cex.main=1.2),cex = 1, pos = 1)) # plots robust estimates of Mahalanobis distance
+plot(m1) # plots robust estimates of Mahalanobis distance
+
+#Gráfica en base de datos transformados
+plot(t[,1],xx[,1],xlim=c(2000,2025),ylim=c(-0.1,1),xlab="year",ylab="Cobertura",pch=18,col="black")
+points(t[,1],xx[,2], col="blue",pch=20)
+points(t[,1],xx[,3], col="green",pch=17)
+points(t[,1],xx[,4], col="pink",pch=7)
+lines(t[,1],z1[,1],type="l",col="black")
+lines(t[,1],z1[,2],type="l",col="blue")
+lines(t[,1],z1[,3],type="l",col="green")
+lines(t[,1],z1[,4],type="l",col="pink")
+lines(t[,1],l1,type="l",col="black",lty=2)
+lines(t[,1],l2,type="l",col="blue",lty=2)
+lines(t[,1],l3,type="l",col="green",lty=2)
+lines(t[,1],l4,type="l",col="pink",lty=2)
+abline(h=0,col="red")
+legend(2015.5,0.8,paste(c("Indicadores","entubado","otras.mejor.","superficial","otras.no.mejora")),
+       col=c("white","black","blue","green","pink"),pch=c(1,18,20,17,7))
+
+if(plotpdf){dev.off()}#Grafica hasta este ítem
